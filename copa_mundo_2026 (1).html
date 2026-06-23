@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador — Copa do Mundo FIFA 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--green-dk:#0d3d1e;--green-md:#1a5f2e;--green-lt:#2d8a4a;--green-pale:#e8f5ed;--gold:#c9a227;--gold-lt:#f5e199;--bg:#f4f4f0;--surface:#ffffff;--border:#ddddd8;--text:#1a1a18;--text-muted:#5a5a55;--radius:10px;--radius-sm:6px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+.site-header{background:var(--green-dk);color:#fff;padding:0 24px;position:sticky;top:0;z-index:100;border-bottom:3px solid var(--gold)}
+.header-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+.site-logo{display:flex;align-items:center;gap:10px}
+.site-logo .ball{font-size:22px}
+.site-logo h1{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:.5px;line-height:1.1}
+.site-logo p{font-size:10px;opacity:.7;letter-spacing:1px;text-transform:uppercase;margin-top:1px}
+.header-actions{display:flex;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'Inter',sans-serif}
+.btn-gold{background:var(--gold);color:#1a0e00}
+.btn-gold:hover{background:#d4af35}
+.btn-outline{background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff}
+.btn-outline:hover{background:rgba(255,255,255,.1)}
+.nav-tabs{background:var(--green-md);padding:0 24px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tabs-inner{max-width:1280px;margin:0 auto;display:flex;width:100%}
+.nav-tab{padding:12px 18px;color:rgba(255,255,255,.7);font-size:13px;font-weight:500;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:'Inter',sans-serif}
+.nav-tab:hover{color:#fff}
+.nav-tab.active{color:var(--gold-lt);border-bottom-color:var(--gold)}
+.main{max-width:1280px;margin:0 auto;padding:24px 24px 60px}
+.section{display:none}
+.section.active{display:block}
+.hero-bar{background:var(--green-md);color:#fff;border-radius:var(--radius);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.hero-bar h2{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700}
+.hero-bar p{font-size:13px;opacity:.8;margin-top:2px}
+.hero-actions{display:flex;gap:8px;flex-wrap:wrap}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center}
+.stat-card .val{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--green-md);line-height:1}
+.stat-card .lbl{font-size:11px;color:var(--text-muted);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;color:var(--text-muted)}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-dot{width:12px;height:12px;border-radius:3px}
+.groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
+.group-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.group-head{background:var(--green-dk);color:#fff;padding:9px 14px;display:flex;align-items:center;justify-content:space-between}
+.group-head .gname{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px}
+.group-head .ginfo{font-size:11px;opacity:.65}
+.standings{width:100%;border-collapse:collapse}
+.standings th{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);font-weight:500;padding:5px 8px;text-align:center;border-bottom:1px solid var(--border)}
+.standings th.left{text-align:left}
+.standings td{padding:6px 8px;text-align:center;border-bottom:1px solid #f0f0ec;font-size:12px}
+.standings td.left{text-align:left}
+.standings tr:last-child td{border-bottom:none}
+.standings tr.q1{background:#e8f5ed}
+.standings tr.q2{background:#f0faf3}
+.standings tr.q3{background:#fffbeb}
+.standings .pts{font-weight:600;color:var(--green-md)}
+.pos-badge{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:3px;font-size:9px;font-weight:700;margin-right:5px}
+.pos1{background:var(--green-md);color:#fff}
+.pos2{background:#5a8a6a;color:#fff}
+.pos3{background:#b45309;color:#fff}
+.pos4{background:#e5e5e0;color:#5a5a55}
+.games-section{border-top:1px solid var(--border)}
+.games-label{padding:7px 14px 3px;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:500}
+.game-row{display:flex;align-items:center;gap:6px;padding:5px 14px;border-top:1px solid #f0f0ec}
+.game-team-a{flex:1;text-align:right;font-size:11px;font-weight:500}
+.game-team-b{flex:1;text-align:left;font-size:11px;font-weight:500}
+.score-wrap{display:flex;align-items:center;gap:3px}
+.score-inp{width:28px;height:24px;text-align:center;border:1px solid var(--border);border-radius:4px;font-size:13px;font-weight:600;font-family:'Barlow Condensed',sans-serif;background:#fafaf8;color:var(--text);transition:border-color .15s}
+.score-inp:focus{outline:none;border-color:var(--green-md);background:#fff}
+.score-sep{font-size:11px;color:var(--text-muted);font-weight:600}
+.sim-mini{padding:2px 6px;font-size:10px;border:1px solid var(--border);border-radius:3px;background:#fafaf8;cursor:pointer;color:var(--text-muted);font-family:'Inter',sans-serif}
+.sim-mini:hover{background:var(--green-pale);border-color:var(--green-md);color:var(--green-md)}
+.ko-intro{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:20px;font-size:13px;color:var(--text-muted)}
+.ko-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.ko-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.ko-card-head{padding:7px 12px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;background:var(--green-dk);color:rgba(255,255,255,.85)}
+.ko-card-head.bronze{background:#92400e}
+.ko-matchup{padding:10px 12px;display:flex;align-items:center;gap:6px;border-bottom:1px solid #f0f0ec}
+.ko-team{flex:1;font-size:12px;font-weight:500;line-height:1.3}
+.ko-team.win{color:var(--green-md);font-weight:700}
+.ko-team.b{text-align:right}
+.ko-score-mid{font-size:14px;font-weight:700;color:var(--text-muted);font-family:'Barlow Condensed',sans-serif;white-space:nowrap;min-width:38px;text-align:center}
+.ko-actions{padding:7px 12px;display:flex;gap:5px;flex-wrap:wrap}
+.ko-btn{flex:1;padding:5px 6px;font-size:10px;border:1px solid var(--border);border-radius:4px;background:#fafaf8;cursor:pointer;text-align:center;color:var(--text);font-family:'Inter',sans-serif;min-width:50px;transition:all .15s;white-space:nowrap}
+.ko-btn:hover{background:var(--green-pale);border-color:var(--green-md)}
+.ko-btn.primary{background:var(--green-md);color:#fff;border-color:var(--green-md)}
+.ko-btn.primary:hover{background:var(--green-dk)}
+.ko-winner-bar{padding:6px 12px;font-size:11px;font-weight:600;color:var(--green-md);background:var(--green-pale);display:flex;align-items:center;gap:4px}
+.champion{background:var(--green-dk);color:#fff;border-radius:var(--radius);padding:40px 24px;text-align:center;margin-top:24px;border:3px solid var(--gold)}
+.champion .trophy{font-size:52px;margin-bottom:10px}
+.champion h2{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:700;letter-spacing:1px;color:var(--gold-lt)}
+.champion p{font-size:13px;opacity:.75;margin-top:6px}
+.podium{display:flex;gap:12px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+.podium-item{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--radius);padding:12px 20px;text-align:center;min-width:120px}
+.podium-item .medal{font-size:20px}
+.podium-item .pname{font-size:13px;font-weight:600;margin-top:4px}
+.podium-item .place{font-size:10px;opacity:.65;margin-top:2px}
+@media(max-width:600px){.main{padding:14px 10px 48px}.groups-grid{grid-template-columns:1fr}.ko-grid{grid-template-columns:1fr}.hero-bar{flex-direction:column;align-items:flex-start}.header-actions{display:none}.stats-row{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="site-logo">
+      <span class="ball">⚽</span>
+      <div>
+        <h1>Copa do Mundo FIFA 2026</h1>
+        <p>EUA · Canadá · México · 104 jogos</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" onclick="resetarTodos()">↺ Resetar tudo</button>
+      <button class="btn btn-gold" onclick="simularTudo()">🎲 Simular Copa</button>
+    </div>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <div class="nav-tabs-inner">
+    <button class="nav-tab active" onclick="showTab('grupos',this)">Fase de Grupos (72)</button>
+    <button class="nav-tab" onclick="showTab('r32',this)">Rodada de 32 (16)</button>
+    <button class="nav-tab" onclick="showTab('oitavas',this)">Oitavas (8)</button>
+    <button class="nav-tab" onclick="showTab('quartas',this)">Quartas (4)</button>
+    <button class="nav-tab" onclick="showTab('semi',this)">Semifinais (2)</button>
+    <button class="nav-tab" onclick="showTab('final',this)">Final + 3º Lugar (2)</button>
+  </div>
+</nav>
+
+<main class="main">
+
+  <div id="tab-grupos" class="section active">
+    <div class="hero-bar">
+      <div>
+        <h2>Fase de Grupos</h2>
+        <p>12 grupos · 6 jogos por grupo · 72 jogos no total · 11–27 jun 2026</p>
+      </div>
+      <div class="hero-actions">
+        <button class="btn btn-outline" onclick="resetarTodos()">↺ Resetar</button>
+        <button class="btn btn-gold" onclick="simularTodos()">🎲 Simular todos</button>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="val">48</div><div class="lbl">Seleções</div></div>
+      <div class="stat-card"><div class="val">12</div><div class="lbl">Grupos</div></div>
+      <div class="stat-card"><div class="val">104</div><div class="lbl">Total de jogos</div></div>
+      <div class="stat-card"><div class="val" id="stat-jogos">0</div><div class="lbl">Jogos disputados</div></div>
+      <div class="stat-card"><div class="val" id="stat-gols">0</div><div class="lbl">Gols marcados</div></div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#1a5f2e"></div>1º lugar — classificado</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#5a8a6a"></div>2º lugar — classificado</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#b45309"></div>3º lugar — possível classificado (8 melhores)</div>
+    </div>
+    <div class="groups-grid" id="groups-container"></div>
+  </div>
+
+  <div id="tab-r32" class="section">
+    <div class="hero-bar">
+      <div><h2>Rodada de 32</h2><p>32 times · 16 confrontos · 28 jun – 2 jul 2026</p></div>
+      <div class="hero-actions"><button class="btn btn-gold" onclick="simularFase('r32')">🎲 Simular fase</button></div>
+    </div>
+    <div class="ko-intro" id="r32-intro">Complete a fase de grupos (todos os 72 jogos) para liberar a Rodada de 32.</div>
+    <div class="ko-grid" id="r32-container"></div>
+  </div>
+
+  <div id="tab-oitavas" class="section">
+    <div class="hero-bar">
+      <div><h2>Oitavas de Final</h2><p>16 times · 8 confrontos · 4–7 jul 2026</p></div>
+      <div class="hero-actions"><button class="btn btn-gold" onclick="simularFase('oitavas')">🎲 Simular fase</button></div>
+    </div>
+    <div class="ko-intro" id="oitavas-intro">Complete a Rodada de 32 para liberar as Oitavas.</div>
+    <div class="ko-grid" id="oitavas-container"></div>
+  </div>
+
+  <div id="tab-quartas" class="section">
+    <div class="hero-bar">
+      <div><h2>Quartas de Final</h2><p>8 times · 4 confrontos · 10–11 jul 2026</p></div>
+      <div class="hero-actions"><button class="btn btn-gold" onclick="simularFase('quartas')">🎲 Simular fase</button></div>
+    </div>
+    <div class="ko-intro" id="quartas-intro">Complete as Oitavas para liberar as Quartas.</div>
+    <div class="ko-grid" id="quartas-container"></div>
+  </div>
+
+  <div id="tab-semi" class="section">
+    <div class="hero-bar">
+      <div><h2>Semifinais</h2><p>4 times · 2 confrontos · 14–15 jul 2026</p></div>
+      <div class="hero-actions"><button class="btn btn-gold" onclick="simularFase('semi')">🎲 Simular fase</button></div>
+    </div>
+    <div class="ko-intro" id="semi-intro">Complete as Quartas para liberar as Semifinais.</div>
+    <div class="ko-grid" id="semi-container"></div>
+  </div>
+
+  <div id="tab-final" class="section">
+    <div class="hero-bar">
+      <div><h2>Final + 3º Lugar</h2><p>MetLife Stadium, Nova York · 18–19 jul 2026</p></div>
+      <div class="hero-actions"><button class="btn btn-gold" onclick="simularFase('final')">🎲 Simular Final</button></div>
+    </div>
+    <div class="ko-intro" id="final-intro">Complete as Semifinais para liberar a Final e a disputa de 3º lugar.</div>
+    <div class="ko-grid" id="final-container"></div>
+    <div id="champion-container"></div>
+  </div>
+
+</main>
+
+<script>
+// ── DADOS ──────────────────────────────────────────────────────────────
+const GRUPOS = {
+  A:['México','África do Sul','Coreia do Sul','Rep. Tcheca'],
+  B:['Canadá','Bósnia','Catar','Suíça'],
+  C:['Brasil','Marrocos','Haiti','Escócia'],
+  D:['Estados Unidos','Paraguai','Austrália','Turquia'],
+  E:['Alemanha','Curaçao','Costa do Marfim','Equador'],
+  F:['Holanda','Japão','Tunísia','Suécia'],
+  G:['Bélgica','Egito','Irã','Nova Zelândia'],
+  H:['Espanha','Cabo Verde','Arábia Saudita','Uruguai'],
+  I:['França','Senegal','Noruega','Iraque'],
+  J:['Argentina','Argélia','Áustria','Jordânia'],
+  K:['Portugal','RD Congo','Uzbequistão','Colômbia'],
+  L:['Inglaterra','Croácia','Gana','Panamá']
+};
+
+// Todos os 6 pares possíveis num grupo de 4 (rodada de pontos corridos)
+// 1x2, 3x4, 1x3, 2x4, 1x4, 2x3  → índices 0-based
+const PARES = [[0,1],[2,3],[0,2],[1,3],[0,3],[1,2]];
+
+// ── STATE ──────────────────────────────────────────────────────────────
+let state = {
+  grupos: {},
+  r32:[], oitavas:[], quartas:[], semi:[], final:[],
+  terceiro: null, campeao: null, terceiro_lugar: null
+};
+
+Object.keys(GRUPOS).forEach(g => {
+  state.grupos[g] = {
+    times: GRUPOS[g],
+    // 6 jogos por grupo = C(4,2) = 4!/(2!2!) = 6  ✓
+    jogos: PARES.map(([a,b]) => ({a, b, golsA:null, golsB:null})),
+    tabela: GRUPOS[g].map(t => ({nome:t,pts:0,j:0,v:0,e:0,d:0,gm:0,gc:0,sg:0}))
+  };
+});
+
+// ── LÓGICA ────────────────────────────────────────────────────────────
+function calcTabela(g) {
+  const gr = state.grupos[g];
+  gr.tabela.forEach(t => Object.assign(t,{pts:0,j:0,v:0,e:0,d:0,gm:0,gc:0,sg:0}));
+  gr.jogos.forEach(j => {
+    if(j.golsA===null || j.golsB===null) return;
+    const ta = gr.tabela[j.a], tb = gr.tabela[j.b];
+    ta.j++; tb.j++;
+    ta.gm += j.golsA; ta.gc += j.golsB; ta.sg += (j.golsA - j.golsB);
+    tb.gm += j.golsB; tb.gc += j.golsA; tb.sg += (j.golsB - j.golsA);
+    if(j.golsA > j.golsB)      { ta.v++; ta.pts+=3; tb.d++; }
+    else if(j.golsA < j.golsB) { tb.v++; tb.pts+=3; ta.d++; }
+    else                        { ta.e++; ta.pts++;  tb.e++; tb.pts++; }
+  });
+  gr.tabela.sort((a,b) => b.pts-a.pts || b.sg-a.sg || b.gm-a.gm || a.nome.localeCompare(b.nome));
+}
+
+function rndGol() {
+  const r = Math.random();
+  if(r < .18) return 0;
+  if(r < .44) return 1;
+  if(r < .68) return 2;
+  if(r < .83) return 3;
+  if(r < .93) return 4;
+  return 5;
+}
+
+function rndPlacar() { return [rndGol(), rndGol()]; }
+
+// Simula um jogo da fase de grupos
+function simularJogoGrupo(g, idx) {
+  const [a, b] = rndPlacar();
+  state.grupos[g].jogos[idx].golsA = a;
+  state.grupos[g].jogos[idx].golsB = b;
+}
+
+// Simula TODOS os 72 jogos da fase de grupos
+function simularTodos() {
+  Object.keys(GRUPOS).forEach(g => {
+    state.grupos[g].jogos.forEach((_, i) => simularJogoGrupo(g, i));
+  });
+  atualizarTudo();
+}
+
+function resetarTodos() {
+  Object.keys(GRUPOS).forEach(g => {
+    state.grupos[g].jogos.forEach(j => { j.golsA=null; j.golsB=null; });
+  });
+  state.r32=[]; state.oitavas=[]; state.quartas=[]; state.semi=[]; state.final=[];
+  state.terceiro=null; state.campeao=null; state.terceiro_lugar=null;
+  atualizarTudo();
+  ['r32','oitavas','quartas','semi','final'].forEach(f => renderKO(f));
+  document.getElementById('champion-container').innerHTML='';
+}
+
+function atualizarTudo() {
+  renderGrupos();
+  atualizarStats();
+  tentarGerarR32();
+}
+
+function atualizarStats() {
+  let jogos=0, gols=0;
+  Object.keys(GRUPOS).forEach(g => {
+    state.grupos[g].jogos.forEach(j => {
+      if(j.golsA!==null){ jogos++; gols+=j.golsA+j.golsB; }
+    });
+  });
+  document.getElementById('stat-jogos').textContent = jogos;
+  document.getElementById('stat-gols').textContent = gols;
+}
+
+// ── CLASSIFICAÇÃO PARA R32 ────────────────────────────────────────────
+function tentarGerarR32() {
+  // Só gera se TODOS os 72 jogos estiverem completos
+  const todosCompletos = Object.keys(GRUPOS).every(g =>
+    state.grupos[g].jogos.every(j => j.golsA!==null && j.golsB!==null)
+  );
+  if(!todosCompletos) return;
+  if(state.r32.length > 0) return; // já gerado
+
+  Object.keys(GRUPOS).forEach(g => calcTabela(g));
+
+  const primeiros = [], segundos = [], terceiros = [];
+  Object.keys(GRUPOS).forEach(g => {
+    const tab = state.grupos[g].tabela;
+    primeiros.push({...tab[0], grupo:g});
+    segundos.push({...tab[1], grupo:g});
+    terceiros.push({...tab[2], grupo:g});
+  });
+
+  // 8 melhores terceiros (critério: pts > sg > gm)
+  terceiros.sort((a,b) => b.pts-a.pts || b.sg-a.sg || b.gm-a.gm);
+  const melhores3 = terceiros.slice(0,8);
+
+  // Monta os 16 jogos da Rodada de 32
+  // 12 confrontos: 1º de cada grupo vs 2º de outro grupo (seguindo chaveamento FIFA 2026)
+  // + 4 confrontos: 1º vs melhor 3º
+  // Para simplicidade didática: 1ºA vs 2ºB, 1ºC vs 2ºD, ... e as 4 vagas de 3ºs
+  const r32 = [];
+
+  // 12 confrontos entre 1ºs e 2ºs (pares de grupos opostos)
+  const keys = Object.keys(GRUPOS); // A..L
+  // Pares: A-B, C-D, E-F, G-H, I-J, K-L (1º do par 1 vs 2º do par 2 e vice-versa)
+  const pairesGrupos = [[0,1],[2,3],[4,5],[6,7],[8,9],[10,11]];
+  pairesGrupos.forEach(([i,j]) => {
+    r32.push(newM(primeiros[i].nome, segundos[j].nome));
+    r32.push(newM(primeiros[j].nome, segundos[i].nome));
+  });
+  // 4 confrontos: 1ºs restantes vs melhores 3ºs
+  // (usando os 4 primeiros colocados gerais como cabeças de chave)
+  const primeirosPorPts = [...primeiros].sort((a,b)=>b.pts-a.pts||b.sg-a.sg||b.gm-a.gm);
+  for(let k=0; k<4; k++){
+    r32.push(newM(primeirosPorPts[k].nome, melhores3[k] ? melhores3[k].nome : 'TBD'));
+  }
+
+  state.r32 = r32; // total: 12 + 4 = 16 jogos ✓
+  renderKO('r32');
+}
+
+function newM(a,b){ return {teamA:a, teamB:b, golsA:null, golsB:null, winner:null}; }
+
+// ── MATA-MATA ─────────────────────────────────────────────────────────
+function simularFase(fase) {
+  const matches = state[fase];
+  if(!matches || !matches.length) {
+    alert('Complete a fase anterior primeiro!');
+    return;
+  }
+  matches.forEach(m => {
+    if(!m.winner) {
+      let ga = rndGol(), gb = rndGol();
+      // No mata-mata não pode ter empate — sorteia pênaltis se empatou
+      if(ga === gb) { m.winner = Math.random()<.5 ? m.teamA : m.teamB; }
+      else          { m.winner = ga > gb ? m.teamA : m.teamB; }
+      m.golsA = ga; m.golsB = gb;
+    }
+  });
+  // Disputa de 3º lugar junto com a final
+  if(fase === 'final' && state.terceiro && !state.terceiro.winner) {
+    let ga=rndGol(), gb=rndGol();
+    if(ga===gb){ state.terceiro.winner = Math.random()<.5?state.terceiro.teamA:state.terceiro.teamB; }
+    else       { state.terceiro.winner = ga>gb?state.terceiro.teamA:state.terceiro.teamB; }
+    state.terceiro.golsA=ga; state.terceiro.golsB=gb;
+    state.terceiro_lugar = state.terceiro.winner;
+  }
+  avancarFase(fase);
+  renderKO(fase);
+}
+
+function avancarFase(fase) {
+  const allDone = state[fase].every(m => m.winner);
+  if(!allDone) return;
+  const winners = state[fase].map(m => m.winner);
+
+  if(fase==='r32' && !state.oitavas.length) {
+    state.oitavas = [];
+    for(let i=0;i<16;i+=2) state.oitavas.push(newM(winners[i],winners[i+1]));
+    renderKO('oitavas');
+  }
+  if(fase==='oitavas' && !state.quartas.length) {
+    state.quartas = [];
+    for(let i=0;i<8;i+=2) state.quartas.push(newM(winners[i],winners[i+1]));
+    renderKO('quartas');
+  }
+  if(fase==='quartas' && !state.semi.length) {
+    state.semi = [];
+    for(let i=0;i<4;i+=2) state.semi.push(newM(winners[i],winners[i+1]));
+    renderKO('semi');
+  }
+  if(fase==='semi' && !state.final.length) {
+    const perdedores = state.semi.map(m => m.teamA===m.winner ? m.teamB : m.teamA);
+    state.final    = [newM(winners[0], winners[1])];
+    state.terceiro = newM(perdedores[0], perdedores[1]);
+    renderKO('final');
+  }
+  if(fase==='final') {
+    const f = state.final[0];
+    if(f && f.winner) { state.campeao = f.winner; renderChampion(); }
+  }
+}
+
+function simJogoKO(fase, idx) {
+  const m = state[fase][idx];
+  let ga=rndGol(), gb=rndGol();
+  if(ga===gb){ m.winner=Math.random()<.5?m.teamA:m.teamB; }
+  else       { m.winner=ga>gb?m.teamA:m.teamB; }
+  m.golsA=ga; m.golsB=gb;
+  avancarFase(fase);
+  renderKO(fase);
+}
+
+function vencerKO(fase, idx, lado) {
+  const m = state[fase][idx];
+  m.winner = lado==='A' ? m.teamA : m.teamB;
+  m.golsA=null; m.golsB=null;
+  avancarFase(fase);
+  renderKO(fase);
+}
+
+function simTerceiro() {
+  const td = state.terceiro;
+  let ga=rndGol(), gb=rndGol();
+  if(ga===gb){ td.winner=Math.random()<.5?td.teamA:td.teamB; }
+  else       { td.winner=ga>gb?td.teamA:td.teamB; }
+  td.golsA=ga; td.golsB=gb;
+  state.terceiro_lugar=td.winner;
+  renderKO('final');
+}
+
+function vencerTerceiro(lado) {
+  const td=state.terceiro;
+  td.winner=lado==='A'?td.teamA:td.teamB;
+  state.terceiro_lugar=td.winner;
+  renderKO('final');
+}
+
+// ── RENDER GRUPOS ─────────────────────────────────────────────────────
+function renderGrupos() {
+  const cont = document.getElementById('groups-container');
+  cont.innerHTML = '';
+  Object.keys(GRUPOS).forEach(g => {
+    calcTabela(g);
+    const gr = state.grupos[g];
+    const feitos = gr.jogos.filter(j=>j.golsA!==null).length;
+    const card = document.createElement('div');
+    card.className = 'group-card';
+
+    const tbody = gr.tabela.map((t,i) => `
+      <tr class="${['q1','q2','q3',''][i]}">
+        <td class="left"><span class="pos-badge pos${i+1}">${i+1}</span>${t.nome}</td>
+        <td>${t.j}</td><td>${t.v}</td><td>${t.e}</td><td>${t.d}</td>
+        <td>${t.sg>0?'+'+t.sg:t.sg}</td><td class="pts">${t.pts}</td>
+      </tr>`).join('');
+
+    const gameRows = gr.jogos.map((j,idx) => `
+      <div class="game-row">
+        <span class="game-team-a">${gr.times[j.a]}</span>
+        <div class="score-wrap">
+          <input class="score-inp" type="number" min="0" max="20"
+            value="${j.golsA!==null?j.golsA:''}" placeholder="–"
+            oninput="setGol('${g}',${idx},'a',this.value)">
+          <span class="score-sep">×</span>
+          <input class="score-inp" type="number" min="0" max="20"
+            value="${j.golsB!==null?j.golsB:''}" placeholder="–"
+            oninput="setGol('${g}',${idx},'b',this.value)">
+          <button class="sim-mini" onclick="simJogoBtn('${g}',${idx})">🎲</button>
+        </div>
+        <span class="game-team-b">${gr.times[j.b]}</span>
+      </div>`).join('');
+
+    card.innerHTML = `
+      <div class="group-head">
+        <span class="gname">GRUPO ${g}</span>
+        <span class="ginfo">${feitos}/6 jogos</span>
+      </div>
+      <table class="standings">
+        <thead><tr>
+          <th class="left">Seleção</th>
+          <th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th><th>Pts</th>
+        </tr></thead>
+        <tbody>${tbody}</tbody>
+      </table>
+      <div class="games-section">
+        <div class="games-label">Jogos do grupo</div>
+        ${gameRows}
+      </div>`;
+    cont.appendChild(card);
+  });
+}
+
+function setGol(g, idx, lado, val) {
+  const v = parseInt(val);
+  if(isNaN(v)||v<0||v>20) return;
+  state.grupos[g].jogos[idx][lado==='a'?'golsA':'golsB'] = v;
+  // Se os dois lados preenchidos, verifica se libera R32
+  calcTabela(g);
+  atualizarStats();
+  // Verifica se agora todos os grupos estão completos
+  tentarGerarR32();
+  renderGrupos();
+}
+
+function simJogoBtn(g, idx) {
+  simularJogoGrupo(g, idx);
+  atualizarTudo();
+}
+
+// ── RENDER MATA-MATA ──────────────────────────────────────────────────
+function renderKO(fase) {
+  const introEl = document.getElementById(fase+'-intro');
+  const cont    = document.getElementById(fase+'-container');
+  const matches = state[fase];
+
+  if(!matches||!matches.length) {
+    if(introEl) introEl.style.display='';
+    if(cont) cont.innerHTML='';
+    return;
+  }
+  if(introEl) introEl.style.display='none';
+
+  const nomes = {
+    r32:'Rodada de 32', oitavas:'Oitavas de Final',
+    quartas:'Quartas de Final', semi:'Semifinais', final:'Grande Final'
+  };
+
+  cont.innerHTML = matches.map((m,i) => {
+    const scoreStr = m.golsA!==null ? `${m.golsA} × ${m.golsB}` : 'vs';
+    const actions = !m.winner
+      ? `<div class="ko-actions">
+           <button class="ko-btn primary" onclick="simJogoKO('${fase}',${i})">🎲 Simular</button>
+           <button class="ko-btn" onclick="vencerKO('${fase}',${i},'A')">${m.teamA.split(' ')[0]} vence</button>
+           <button class="ko-btn" onclick="vencerKO('${fase}',${i},'B')">${m.teamB.split(' ')[0]} vence</button>
+         </div>`
+      : `<div class="ko-winner-bar">✓ ${m.winner} avança</div>`;
+    return `
+      <div class="ko-card">
+        <div class="ko-card-head">${nomes[fase]} · Jogo ${i+1}</div>
+        <div class="ko-matchup">
+          <div class="ko-team ${m.winner===m.teamA?'win':''}">${m.teamA}</div>
+          <div class="ko-score-mid">${scoreStr}</div>
+          <div class="ko-team b ${m.winner===m.teamB?'win':''}">${m.teamB}</div>
+        </div>
+        ${actions}
+      </div>`;
+  }).join('');
+
+  // Disputa de 3º lugar (exibida na aba Final)
+  if(fase==='final' && state.terceiro) {
+    const td = state.terceiro;
+    const s  = td.golsA!==null ? `${td.golsA} × ${td.golsB}` : 'vs';
+    const ac = !td.winner
+      ? `<div class="ko-actions">
+           <button class="ko-btn primary" onclick="simTerceiro()">🎲 Simular</button>
+           <button class="ko-btn" onclick="vencerTerceiro('A')">${td.teamA.split(' ')[0]} vence</button>
+           <button class="ko-btn" onclick="vencerTerceiro('B')">${td.teamB.split(' ')[0]} vence</button>
+         </div>`
+      : `<div class="ko-winner-bar" style="color:#b45309;background:#fff7ed">🥉 ${td.winner} — 3º lugar</div>`;
+    cont.innerHTML += `
+      <div class="ko-card">
+        <div class="ko-card-head bronze">Disputa de 3º Lugar · Miami, 18 jul</div>
+        <div class="ko-matchup">
+          <div class="ko-team ${td.winner===td.teamA?'win':''}">${td.teamA}</div>
+          <div class="ko-score-mid">${s}</div>
+          <div class="ko-team b ${td.winner===td.teamB?'win':''}">${td.teamB}</div>
+        </div>
+        ${ac}
+      </div>`;
+  }
+}
+
+function renderChampion() {
+  const cont = document.getElementById('champion-container');
+  if(!cont||!state.campeao) return;
+  const c = state.campeao;
+  const v = state.final[0] ? (state.final[0].teamA===c?state.final[0].teamB:state.final[0].teamA) : '';
+  const t3 = state.terceiro_lugar||'';
+  cont.innerHTML = `
+    <div class="champion">
+      <div class="trophy">🏆</div>
+      <h2>${c}</h2>
+      <p>Campeã da Copa do Mundo FIFA 2026 — MetLife Stadium, Nova York</p>
+      <div class="podium">
+        <div class="podium-item"><div class="medal">🥇</div><div class="pname">${c}</div><div class="place">Campeã</div></div>
+        ${v?`<div class="podium-item"><div class="medal">🥈</div><div class="pname">${v}</div><div class="place">Vice-campeã</div></div>`:''}
+        ${t3?`<div class="podium-item"><div class="medal">🥉</div><div class="pname">${t3}</div><div class="place">3º lugar</div></div>`:''}
+      </div>
+    </div>`;
+}
+
+// ── SIMULAR COPA TODA ─────────────────────────────────────────────────
+function simularTudo() {
+  resetarTodos();
+  simularTodos();          // 72 jogos
+  // Aguarda render, depois simula mata-mata em cascata
+  setTimeout(()=>{ simularFase('r32');
+  setTimeout(()=>{ simularFase('oitavas');
+  setTimeout(()=>{ simularFase('quartas');
+  setTimeout(()=>{ simularFase('semi');
+  setTimeout(()=>{ simularFase('final'); },80);},80);},80);},80);},120);
+}
+
+function showTab(name, el) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+renderGrupos();
+</script>
+</body>
+</html>
